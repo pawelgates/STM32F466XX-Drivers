@@ -5,6 +5,27 @@
 
 #include <stdint.h>
 
+/*************** Processor specific details **************/
+/* Arm Cortex Mx Processor NVIC ISERx register addresses */
+
+#define NVIC_ISER0			((volatile uint32_t*) 0xE000E100)
+#define NVIC_ISER1			((volatile uint32_t*) 0xE000E104)
+#define NVIC_ISER2			((volatile uint32_t*) 0xE000E108)
+#define NVIC_ISER3			((volatile uint32_t*) 0xE000E10C)
+
+/* Arm Cortex Mx Processor NVIC ICERx register addresses */
+
+#define NVIC_ICER0			((volatile uint32_t*) 0xE000E180)
+#define NVIC_ICER1			((volatile uint32_t*) 0xE000E184)
+#define NVIC_ICER2			((volatile uint32_t*) 0xE000E188)
+#define NVIC_ICER3			((volatile uint32_t*) 0xE000E18C)
+
+/* Arm Cortex Mx Processor Priority register addresses */
+
+#define NVIC_PR_BASEADDR	((volatile uint32_t*) 0xE000E400)
+
+#define NO_PR_BITS_IMPLEMENTED		4
+
 /* GENERIC */
 
 #define ENABLE 				1
@@ -131,6 +152,28 @@
 #define GPIOH_REG_RESET() 	do{ (RCC->AHB1RSTR |= (1 << 7)); (RCC->AHB1RSTR &= ~(1 << 7)); } while(0)	// Set bit and clear bit function
 
 
+/* GPIO port base address to 4 bit code */
+
+#define GPIO_BASEADDR_TO_CODE(x)		(	(x == GPIOA) ? 0 : \
+											(x == GPIOB) ? 1 : \
+											(x == GPIOC) ? 2 : \
+											(x == GPIOD) ? 3 : \
+											(x == GPIOE) ? 4 : \
+											(x == GPIOF) ? 5 : \
+											(x == GPIOG) ? 6 : \
+											(x == GPIOH) ? 7 : 0	)
+
+/* IRQ - Interrupt Request numbers (positions in vector table) */
+
+#define IRQ_NO_EXTI0		6
+#define IRQ_NO_EXTI1		7
+#define IRQ_NO_EXTI2		8
+#define IRQ_NO_EXTI3		9
+#define IRQ_NO_EXTI4		10
+#define IRQ_NO_EXTI9_5		23
+#define IRQ_NO_EXTI15_10	40
+
+
 /* GPIO register definition structure*/
 
 typedef struct
@@ -143,7 +186,7 @@ typedef struct
 	volatile uint32_t ODR;		/* GPIO port output data register */
 	volatile uint32_t BSRR;		/* GPIO port bit set/reset register */
 	volatile uint32_t LCKR;		/* GPIO port configuration lock register */
-	volatile uint32_t AFR[2];		/* GPIO alternate function low register and high register */
+	volatile uint32_t AFR[2];	/* GPIO alternate function low register and high register */
 
 } GPIO_RegDef_t;
 
@@ -192,6 +235,34 @@ typedef struct
 
 } RCC_RegDef_t;
 
+
+/* RCC register definition structure*/
+
+typedef struct
+{
+	volatile uint32_t IMR;			/* Interrupt mask register */
+	volatile uint32_t EMR;			/* Event mask register */
+	volatile uint32_t RTSR; 		/* Rising trigger selection register */
+	volatile uint32_t FTSR;			/* Falling trigger selection register */
+	volatile uint32_t SWIER;		/* Software interrupt event register */
+	volatile uint32_t PR;			/* Pending register */
+
+} EXTI_RegDef_t;
+
+/* SYSCFG register definition structure*/
+
+typedef struct
+{
+	volatile uint32_t MEMRMP;		/* SYSCFG memory re-map register */
+	volatile uint32_t PMC;			/* SYSCFG peripheral mode configuration register */
+	volatile uint32_t EXTICR[4]; 	/* SYSCFG external interrupt configuration register 1-4 */
+	volatile uint32_t RESERVED0[2];	/* */
+	volatile uint32_t CMPCR;		/* Compensation cell control register */
+	volatile uint32_t RESERVED1[2];	/* */
+	volatile uint32_t CFGR;			/* SYSCFG configuration register */
+
+} SYSCFG_RegDef_t;
+
 /* Peripheral base addresses type casted to XXX_RegDef_t */
 
 #define GPIOA 			((GPIO_RegDef_t *)GPIOA_BASEADDR)
@@ -204,6 +275,9 @@ typedef struct
 #define GPIOH 			((GPIO_RegDef_t *)GPIOH_BASEADDR)
 
 #define RCC 			((RCC_RegDef_t *)RCC_BASEADDR)
+#define EXTI			((EXTI_RegDef_t *)EXTI_BASEADDR)
+#define SYSCFG			((SYSCFG_RegDef_t *)SYSCFG_BASEADDR)
+
 
 
 #include "stm32f446xx_gpio_driver.h"
