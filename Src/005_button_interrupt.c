@@ -12,8 +12,8 @@ void delay(int num)
 
 void EXTI15_10_IRQHandler(void)
 {
+	delay(100000);
 	GPIO_IRQHandling(GPIO_PIN_NUM_13);
-
 	GPIO_ToggleOutputPin(GPIOA, GPIO_PIN_NUM_5);
 }
 
@@ -40,7 +40,7 @@ int main(void)
 	// GPIO BUTTON initialization
 	gpio_button.pGPIOX = GPIOC;
 	gpio_button.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_NUM_13;
-	gpio_button.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_INT_RFT;
+	gpio_button.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_INT_FT;
 	gpio_button.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_FAST;
 	gpio_button.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_NO_PUPD;
 
