@@ -63,11 +63,17 @@ int main(void)
 	/* SPI2 initialization */
 	SPI2_Inits();
 
+	/* SPI2 SSI configuration - NNS signal internally high */
+	SPI_SSIConfig(SPI2, ENABLE);
+
 	/* SPI2 enable */
 	SPI_PeripheralControl(SPI2, ENABLE);
 
 	/* Sending the data */
 	SPI_SendData(SPI2, (uint8_t *)user_data, strlen(user_data));
+
+	/* SPI2 disable */
+	SPI_PeripheralControl(SPI2, DISABLE);
 
 	while(1);
 

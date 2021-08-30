@@ -160,6 +160,31 @@ void SPI_PeripheralControl(SPI_RegDef_t *pSPIx, uint8_t EnOrDi)
 
 
 /*********************************************************************************
+ * @function 				- SPI_SSIConfig
+ * @brief					- This function ENABLEs or DISABLEs the SPIx peripheral SSI bit
+ *
+ * @parameter[in]			- Base address to SPI peripheral
+ * @parameter[in]			- ENABLE or DISABLE
+ *
+ * @return					- NONE
+ *
+ * @note					- NONE
+ */
+
+void SPI_SSIConfig(SPI_RegDef_t *pSPIx, uint8_t EnOrDi)
+{
+	if(EnOrDi == ENABLE)
+	{
+		pSPIx->CR1 |= (1 << SPI_CR1_SSI);
+	}
+	else
+	{
+		pSPIx->CR1 &= ~(1 << SPI_CR1_SSI);
+	}
+}
+
+
+/*********************************************************************************
  * @function 				- SPI_GetFlagStatus
  * @brief					- This function returns the flag status (1 or 0)
  *
