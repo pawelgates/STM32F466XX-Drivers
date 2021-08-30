@@ -66,6 +66,9 @@ void SPI_PeriClockControl(SPI_RegDef_t *pSPIx, uint8_t EnOrDi)
 
 void SPI_Init(SPI_Handle_t *pSPIHandle)
 {
+	/* Enable the peripheral clock */
+	SPI_PeriClockControl(pSPIHandle->pSPIx, ENABLE);
+
 	/* SPI_CR1 configuration */
 	uint32_t temp = 0;
 
@@ -105,10 +108,9 @@ void SPI_Init(SPI_Handle_t *pSPIHandle)
 
 /*********************************************************************************
  * @function 				- SPI_DeInit
- * @brief					- This function resets the SPI peripheral via RCC register
+ * @brief					- This function resets the SPI peripheral via RCC Bus Reset register
  *
  * @parameter[in]			- Base address to SPI peripheral
- * @parameter[in]			-
  *
  * @return					- NONE
  *
@@ -133,20 +135,90 @@ void SPI_DeInit(SPI_RegDef_t *pSPIx)
 
 
 /*********************************************************************************
- * @function 				- SPI_SendData
- * @brief					-
+ * @function 				- SPI_PeripheralControl
+ * @brief					- This function ENABLEs or DISABLEs the SPIx peripheral
  *
- * @parameter[in]			-
- * @parameter[in]			-
+ * @parameter[in]			- Base address to SPI peripheral
+ * @parameter[in]			- ENABLE or DISABLE
  *
  * @return					- NONE
  *
  * @note					- NONE
  */
 
+void SPI_PeripheralControl(SPI_RegDef_t *pSPIx, uint8_t EnOrDi)
+{
+	if(EnOrDi == ENABLE)
+	{
+		pSPIx->CR1 |= (1 << SPI_CR1_SPE);
+	}
+	else
+	{
+		pSPIx->CR1 &= ~(1 << SPI_CR1_SPE);
+	}
+}
+
+
+/*********************************************************************************
+ * @function 				- SPI_GetFlagStatus
+ * @brief					- This function returns the flag status (1 or 0)
+ *
+ * @parameter[in]			- Base address to SPI peripheral
+ * @parameter[in]			- Flag name according to status register (SR)
+ *
+ * @return					- Flag status (0 or 1)
+ *
+ * @note					- NONE
+ */
+
+uint8_t SPI_GetFlagStatus(SPI_RegDef_t *pSPIx, uint32_t FlagName)
+{
+	if(pSPIx->SR & FlagName)
+	{
+		return FLAG_SET;
+	}
+	return FLAG_RESET;
+}
+
+/*********************************************************************************
+ * @function 				- SPI_SendData
+ * @brief					- This function will send data from TxBuffer via SPIx
+ *
+ * @parameter[in]			- Base address to SPI peripheral
+ * @parameter[in]			- Pointer to TxBuffer
+ * @parameter[in]			- Length of the buffer in bytes
+ *
+ * @return					- NONE
+ *
+ * @note					- This is blocking call
+ */
+
 void SPI_SendData(SPI_RegDef_t *pSPIx, uint8_t *pTxBuffer, uint32_t Len)
 {
+	while(Len > 0)
+	{
+		/* Waiting until TXE flag is set */
+		while(SPI_GetFlagStatus(pSPIx, SPI_TXE_FLAG) == FLAG_RESET);
 
+		/* Checking the DFF in CR1 register */
+		if(pSPIx->CR1 & (1 << SPI_CR1_DFF))
+		{
+			/* 16 bit data frame format */
+			pSPIx->DR = *((uint16_t *)pTxBuffer);
+			Len--;
+			Len--;
+			(uint16_t *)pTxBuffer++;
+			(uint16_t *)pTxBuffer++;
+		}
+		else
+		{
+			/* 8 bit data frame format */
+			pSPIx->DR = *pTxBuffer;
+			Len--;
+			pTxBuffer++;
+		}
+
+	}
 }
 
 
