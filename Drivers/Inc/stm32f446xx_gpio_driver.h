@@ -29,6 +29,10 @@ typedef struct
 } GPIO_Handle_t;
 
 
+
+/**************************** MACROS FOR THIS DRIVER *****************************/
+/*********************************************************************************/
+
 /* @GPIO_PIN_NUMBER */
 
 #define GPIO_PIN_NUM_0					0
@@ -83,7 +87,8 @@ typedef struct
 
 
 
-/* APIs supported by this driver */
+/************************ APIs SUPPORTED BY THIS DRIVER **************************/
+/*********************************************************************************/
 
 void GPIO_PeriClockControl(GPIO_RegDef_t *pGPIOx, uint8_t EnOrDi);
 

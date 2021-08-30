@@ -255,7 +255,7 @@ typedef struct
 } RCC_RegDef_t;
 
 
-/* RCC register definition structure*/
+/* EXTI register definition structure*/
 
 typedef struct
 {
@@ -267,6 +267,7 @@ typedef struct
 	volatile uint32_t PR;			/* Pending register */
 
 } EXTI_RegDef_t;
+
 
 /* SYSCFG register definition structure*/
 
@@ -281,6 +282,23 @@ typedef struct
 	volatile uint32_t CFGR;			/* SYSCFG configuration register */
 
 } SYSCFG_RegDef_t;
+
+
+/* SPI register definition structure*/
+
+typedef struct
+{
+	volatile uint32_t CR1;			/* SPI control register 1 */
+	volatile uint32_t CR2;			/* SPI control register 2 */
+	volatile uint32_t SR;			/* SPI status register */
+	volatile uint32_t DR;			/* SPI data register */
+	volatile uint32_t CRCPR;		/* SPI CRC polynomial register */
+	volatile uint32_t RXCRCR;		/* SPI RX CRC register */
+	volatile uint32_t TXCRCR;		/* SPI TX CRC register */
+	volatile uint32_t I2SCFGR;		/* SPI_I2S configuration register */
+	volatile uint32_t I2SPR;		/* SPI_I2S pre-scaler register */
+
+} SPI_RegDef_t;
 
 /* Peripheral base addresses type casted to XXX_RegDef_t */
 
@@ -297,8 +315,13 @@ typedef struct
 #define EXTI			((EXTI_RegDef_t *)EXTI_BASEADDR)
 #define SYSCFG			((SYSCFG_RegDef_t *)SYSCFG_BASEADDR)
 
+#define SPI1			((SPI_RegDef_t *)SPI1_BASEADDR)
+#define SPI2			((SPI_RegDef_t *)SPI2_BASEADDR)
+#define SPI3			((SPI_RegDef_t *)SPI3_BASEADDR)
+
 
 
 #include "stm32f446xx_gpio_driver.h"
+#include "stm32f446xx_spi_driver.h"
 
 #endif /* INC_STM32F446XX_H_ */
