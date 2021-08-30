@@ -97,7 +97,7 @@ void GPIO_PeriClockControl(GPIO_RegDef_t *pGPIOx, uint8_t EnOrDi)
  * @function 				- GPIO_Init
  * @brief					- This function initialize the GPIO port (Pin / Speed / Pull Up-Down resistors / Output type / Alternate functionality)
  *
- * @parameter[in]			- Base address of the GPIO port
+ * @parameter[in]			- Address to GPIO Handle function
  *
  * @return					- NONE
  *

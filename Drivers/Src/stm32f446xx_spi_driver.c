@@ -55,10 +55,9 @@ void SPI_PeriClockControl(SPI_RegDef_t *pSPIx, uint8_t EnOrDi)
 
 /*********************************************************************************
  * @function 				- SPI_Init
- * @brief					-
+ * @brief					- This function initialize the SPI peripheral
  *
- * @parameter[in]			-
- * @parameter[in]			-
+ * @parameter[in]			- Address to SPI Handle function
  *
  * @return					- NONE
  *
@@ -67,14 +66,48 @@ void SPI_PeriClockControl(SPI_RegDef_t *pSPIx, uint8_t EnOrDi)
 
 void SPI_Init(SPI_Handle_t *pSPIHandle)
 {
+	/* SPI_CR1 configuration */
+	uint32_t temp = 0;
+
+	/* Device mode */
+	temp |= (pSPIHandle->SPIConfig.SPI_DeviceMode << SPI_CR1_MSTR);
+
+	/* Bus configuration */
+	if(pSPIHandle->SPIConfig.SPI_BusConfig == SPI_BUSCONFIG_FULLDUPLEX)
+	{
+		temp &= ~(1 << SPI_CR1_BIDIMODE);
+	}
+	else if(pSPIHandle->SPIConfig.SPI_BusConfig == SPI_BUSCONFIG_HALFDUPLEX)
+	{
+		temp |= (1 << SPI_CR1_BIDIMODE);
+	}
+	else if(pSPIHandle->SPIConfig.SPI_BusConfig == SPI_BUSCONFIG_SIMPLEX_RX)
+	{
+		temp &= ~(1 << SPI_CR1_BIDIMODE);
+		temp |= (1 << SPI_CR1_RXONLY);
+	}
+
+	/* SCLK speed configuration */
+	temp |= (pSPIHandle->SPIConfig.SPI_SclkSpeed << SPI_CR1_BR);
+
+	/* DFF configuration */
+	temp |= (pSPIHandle->SPIConfig.SPI_DFF << SPI_CR1_DFF);
+
+	/* CPOL configuration */
+	temp |= (pSPIHandle->SPIConfig.SPI_CPOL << SPI_CR1_CPOL);
+
+	/* CPHA configuration */
+	temp |= (pSPIHandle->SPIConfig.SPI_CPHA << SPI_CR1_CPHA);
+
+	pSPIHandle->pSPIx->CR1 = temp;
 
 }
 
 /*********************************************************************************
  * @function 				- SPI_DeInit
- * @brief					-
+ * @brief					- This function resets the SPI peripheral via RCC register
  *
- * @parameter[in]			-
+ * @parameter[in]			- Base address to SPI peripheral
  * @parameter[in]			-
  *
  * @return					- NONE
@@ -84,7 +117,18 @@ void SPI_Init(SPI_Handle_t *pSPIHandle)
 
 void SPI_DeInit(SPI_RegDef_t *pSPIx)
 {
-
+	if(pSPIx == SPI1)
+	{
+		SPI1_REG_RESET();
+	}
+	else if(pSPIx == SPI2)
+	{
+		SPI2_REG_RESET();
+	}
+	else if(pSPIx == SPI3)
+	{
+		SPI3_REG_RESET();
+	}
 }
 
 

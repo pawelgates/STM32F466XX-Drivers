@@ -42,8 +42,7 @@ typedef struct
 
 #define SPI_BUSCONFIG_FULLDUPLEX		0
 #define SPI_BUSCONFIG_HALFDUPLEX		1
-#define SPI_BUSCONFIG_SIMPLEX_TX		2
-#define SPI_BUSCONFIG_SIMPLEX_RX		3
+#define SPI_BUSCONFIG_SIMPLEX_RX		2
 
 /* @SPI_SclkSpeed */
 
@@ -73,8 +72,8 @@ typedef struct
 
 /* @SPI_SSM */
 
-#define SPI_SSM_SW						0
-#define SPI_SSM_HW						1
+#define SPI_SSM_DIS						0
+#define SPI_SSM_EN						1
 
 
 /************************ APIs SUPPORTED BY THIS DRIVER **************************/
