@@ -37,6 +37,22 @@ void SPI_GPIOInits(void)
 	GPIO_Init(&spi2_pins);
 }
 
+void GPIO_ButtonInits(void)
+{
+	// BUTTON1 - PC13 pin
+
+	GPIO_Handle_t gpio_button;
+
+	// GPIO BUTTON initialization
+	gpio_button.pGPIOX = GPIOC;
+	gpio_button.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_NUM_13;
+	gpio_button.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_IN;
+	gpio_button.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_FAST;
+	gpio_button.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_NO_PUPD;
+
+	GPIO_Init(&gpio_button);
+}
+
 void SPI2_Inits(void)
 {
 	SPI_Handle_t spi2_handle;
@@ -57,25 +73,35 @@ int main(void)
 {
 	char user_data[] = "Hello world!";
 
-	/* GPIO initialization for SPI2 */
+	/* GPIO initialization for SPI2 and Button */
 	SPI_GPIOInits();
+	GPIO_ButtonInits();
 
 	/* SPI2 initialization */
 	SPI2_Inits();
 
-	/* SPI2 SSI configuration - NNS signal internally high */
-	SPI_SSIConfig(SPI2, ENABLE);
+	/* SPI2 SSOE configuration - NNS output enable */
+	SPI_SSOEConfig(SPI2, ENABLE);
 
-	/* SPI2 enable */
-	SPI_PeripheralControl(SPI2, ENABLE);
+	while(1)
+	{
+		/* Wait until button is pressed */
+		while(! GPIO_ReadFromInputPin(GPIOC, GPIO_PIN_NUM_13));
 
-	/* Sending the data */
-	SPI_SendData(SPI2, (uint8_t *)user_data, strlen(user_data));
+		/* SPI2 enable */
+		SPI_PeripheralControl(SPI2, ENABLE);
 
-	/* SPI2 disable */
-	SPI_PeripheralControl(SPI2, DISABLE);
+		/* Sending the data */
+		uint8_t data_len = strlen(user_data);
+		SPI_SendData(SPI2, &data_len, 1);
+		SPI_SendData(SPI2, (uint8_t *)user_data, strlen(user_data));
 
-	while(1);
+		/* Wait until communication over - BUSSY flag is 0*/
+		while(SPI_GetFlagStatus(SPI2, SPI_BSY_FLAG));
+
+		/* SPI2 disable */
+		SPI_PeripheralControl(SPI2, DISABLE);
+	}
 
 	return 0;
 }

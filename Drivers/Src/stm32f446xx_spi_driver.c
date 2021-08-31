@@ -185,6 +185,31 @@ void SPI_SSIConfig(SPI_RegDef_t *pSPIx, uint8_t EnOrDi)
 
 
 /*********************************************************************************
+ * @function 				- SPI_SSOEConfig
+ * @brief					- This function ENABLEs or DISABLEs the SPIx peripheral SSOE bit
+ *
+ * @parameter[in]			- Base address to SPI peripheral
+ * @parameter[in]			- ENABLE or DISABLE
+ *
+ * @return					- NONE
+ *
+ * @note					- NONE
+ */
+
+void SPI_SSOEConfig(SPI_RegDef_t *pSPIx, uint8_t EnOrDi)
+{
+	if(EnOrDi == ENABLE)
+	{
+		pSPIx->CR1 |= (1 << SPI_CR2_SSOE);
+	}
+	else
+	{
+		pSPIx->CR1 &= ~(1 << SPI_CR2_SSOE);
+	}
+}
+
+
+/*********************************************************************************
  * @function 				- SPI_GetFlagStatus
  * @brief					- This function returns the flag status (1 or 0)
  *
@@ -229,15 +254,16 @@ void SPI_SendData(SPI_RegDef_t *pSPIx, uint8_t *pTxBuffer, uint32_t Len)
 		if(pSPIx->CR1 & (1 << SPI_CR1_DFF))
 		{
 			/* 16 bit data frame format */
+			/* Load data from RX buffer to DR */
 			pSPIx->DR = *((uint16_t *)pTxBuffer);
 			Len--;
 			Len--;
-			(uint16_t *)pTxBuffer++;
 			(uint16_t *)pTxBuffer++;
 		}
 		else
 		{
 			/* 8 bit data frame format */
+			/* Load data from RX buffer to DR */
 			pSPIx->DR = *pTxBuffer;
 			Len--;
 			pTxBuffer++;
@@ -261,7 +287,31 @@ void SPI_SendData(SPI_RegDef_t *pSPIx, uint8_t *pTxBuffer, uint32_t Len)
 
 void SPI_ReceiveData(SPI_RegDef_t *pSPIx, uint8_t *pRxBuffer, uint32_t Len)
 {
+	while(Len > 0)
+	{
+		/* Waiting until RXNE flag is set */
+		while(SPI_GetFlagStatus(pSPIx, SPI_RXNE_FLAG) == FLAG_RESET);
 
+		/* Checking the DFF in CR1 register */
+		if(pSPIx->CR1 & (1 << SPI_CR1_DFF))
+		{
+			/* 16 bit data frame format */
+			/* Load data from DR to RX buffer */
+			*((uint16_t *)pRxBuffer) = pSPIx->DR;
+			Len--;
+			Len--;
+			(uint16_t *)pRxBuffer++;
+		}
+		else
+		{
+			/* 8 bit data frame format */
+			/* Load data from DR to RX buffer */
+			*pRxBuffer = pSPIx->DR;
+			Len--;
+			pRxBuffer++;
+		}
+
+	}
 }
 
 
