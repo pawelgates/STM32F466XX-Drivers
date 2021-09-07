@@ -31,9 +31,9 @@ typedef struct
 
 /* @I2C_SCLSpeed */
 
-#define I2C_SCL_SPEED_SM		100000;
-#define I2C_SCL_SPEED_FM2K		200000;
-#define I2C_SCL_SPEED_FM4K		400000;
+#define I2C_SCL_SPEED_SM		100000
+#define I2C_SCL_SPEED_FM2K		200000
+#define I2C_SCL_SPEED_FM4K		400000
 
 /* @I2C_DeviceAddress - user configuration*/
 
@@ -53,6 +53,8 @@ typedef struct
 
 void I2C_PeriClockControl(I2C_RegDef_t *pI2Cx, uint8_t EnOrDi);
 
+uint32_t RCC_GetPLLOutputClk(void);
+uint32_t RCC_GetPCLK1Value(void);
 void I2C_Init(I2C_Handle_t *pI2CHandle);
 void I2C_DeInit(I2C_RegDef_t *pI2Cx);
 
