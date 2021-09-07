@@ -6,57 +6,7 @@
 uint16_t AHB1_PreScaler[8] = {2, 4, 8, 16, 64, 128, 256, 512};
 uint8_t APB1_PreScaler[4] = {2, 4, 8, 16};
 
-/************************ APIs SUPPORTED BY THIS DRIVER **************************/
-/*********************************************************************************/
-
-/*********************************************************************************
- * @function 				- I2C_PeriClockControl
- * @brief					- This function Enables or Disables peripheral clock for the given I2C peripheral
- *
- * @parameter[in]			- Base address of I2C
- * @parameter[in]			- ENABLE or DISABLE
- *
- * @return					- NONE
- *
- * @note					- NONE
- */
-
-void I2C_PeriClockControl(I2C_RegDef_t *pI2Cx, uint8_t EnOrDi)
-{
-	if(EnOrDi == ENABLE)
-	{
-		if(pI2Cx == I2C1)
-		{
-			I2C1_CLK_EN();
-		}
-		else if(pI2Cx == I2C2)
-		{
-			I2C2_CLK_EN();
-		}
-		else if(pI2Cx == I2C3)
-		{
-			I2C3_CLK_EN();
-		}
-	}
-	else
-	{
-		if(pI2Cx == I2C1)
-		{
-			I2C1_CLK_DI();
-		}
-		else if(pI2Cx == I2C2)
-		{
-			I2C2_CLK_DI();
-		}
-		else if(pI2Cx == I2C3)
-		{
-			I2C3_CLK_DI();
-		}
-	}
-}
-
-
-/* Internal functions for getting the clock of the busses */
+/* Internal functions */
 
 uint32_t RCC_GetPLLOutputClk(void)
 {
@@ -114,6 +64,61 @@ uint32_t RCC_GetPCLK1Value(void)
 
 	return pclk1;
 }
+
+static void I2C_GenerateStartConditions(I2C_RegDef_t *pI2Cx)
+{
+	pI2Cx->CR1 |= (1 << I2C_CR1_START);
+}
+
+/************************ APIs SUPPORTED BY THIS DRIVER **************************/
+/*********************************************************************************/
+
+/*********************************************************************************
+ * @function 				- I2C_PeriClockControl
+ * @brief					- This function Enables or Disables peripheral clock for the given I2C peripheral
+ *
+ * @parameter[in]			- Base address of I2C
+ * @parameter[in]			- ENABLE or DISABLE
+ *
+ * @return					- NONE
+ *
+ * @note					- NONE
+ */
+
+void I2C_PeriClockControl(I2C_RegDef_t *pI2Cx, uint8_t EnOrDi)
+{
+	if(EnOrDi == ENABLE)
+	{
+		if(pI2Cx == I2C1)
+		{
+			I2C1_CLK_EN();
+		}
+		else if(pI2Cx == I2C2)
+		{
+			I2C2_CLK_EN();
+		}
+		else if(pI2Cx == I2C3)
+		{
+			I2C3_CLK_EN();
+		}
+	}
+	else
+	{
+		if(pI2Cx == I2C1)
+		{
+			I2C1_CLK_DI();
+		}
+		else if(pI2Cx == I2C2)
+		{
+			I2C2_CLK_DI();
+		}
+		else if(pI2Cx == I2C3)
+		{
+			I2C3_CLK_DI();
+		}
+	}
+}
+
 
 /*********************************************************************************
  * @function 				- I2C_Init
@@ -204,10 +209,33 @@ void I2C_DeInit(I2C_RegDef_t *pI2Cx)
 
 
 /*********************************************************************************
+ * @function 				- I2C_MasterSendData
+ * @brief					- This function sends data from Master to Slave.
+ *
+ * @parameter[in]			- Address to I2C Handle function
+ * @parameter[in]			- Address to TxBuffer
+ * @parameter[in]			- Length of TxBuffer
+ * @parameter[in]			- Slave address
+ *
+ * @return					- NONE
+ *
+ * @note					- NONE
+ */
+
+void I2C_MasterSendData(I2C_Handle_t *pI2CHandle, uint8_t *pTxBuffer, uint32_t Len, uint8_t SlaveAddr)
+{
+	/* Generate start condition */
+	I2C_GenerateStartConditions(pI2CHandle->pI2Cx);
+
+
+}
+
+
+/*********************************************************************************
  * @function 				- I2C_PeripheralControl
  * @brief					- This function ENABLEs or DISABLEs the I2Cx peripheral via CR1 register
  *
- * @parameter[in]			- Base address to SPI peripheral
+ * @parameter[in]			- Base address to I2C peripheral
  * @parameter[in]			- ENABLE or DISABLE
  *
  * @return					- NONE
