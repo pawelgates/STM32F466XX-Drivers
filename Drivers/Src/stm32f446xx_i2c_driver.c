@@ -70,6 +70,28 @@ static void I2C_GenerateStartConditions(I2C_RegDef_t *pI2Cx)
 	pI2Cx->CR1 |= (1 << I2C_CR1_START);
 }
 
+static void I2C_ExecuteAddressPhase(I2C_RegDef_t *pI2Cx, uint8_t SlaveAddr)
+{
+	/* Shifting address 1 bit to the left */
+	SlaveAddr = SlaveAddr << 1;
+	/* Clearing LSB bit for R/W purpose */
+	SlaveAddr &= ~(0x1);
+	pI2Cx->DR = SlaveAddr;
+}
+
+static void I2C_ClearADDRFlag(I2C_RegDef_t *pI2Cx)
+{
+	uint32_t dummyRead = pI2Cx->SR1;
+	dummyRead = pI2Cx->SR2;
+	(void)dummyRead;
+}
+
+static void I2C_GenerateStopConditions(I2C_RegDef_t *pI2Cx)
+{
+	pI2Cx->CR1 |= (1 << I2C_CR1_STOP);
+}
+
+
 /************************ APIs SUPPORTED BY THIS DRIVER **************************/
 /*********************************************************************************/
 
@@ -209,6 +231,28 @@ void I2C_DeInit(I2C_RegDef_t *pI2Cx)
 
 
 /*********************************************************************************
+ * @function 				- I2C_GetFlagStatus
+ * @brief					- This function returns the flag status (1 or 0)
+ *
+ * @parameter[in]			- Base address to I2C peripheral
+ * @parameter[in]			- Flag name according to status register (SR)
+ *
+ * @return					- Flag status (0 or 1)
+ *
+ * @note					- NONE
+ */
+
+uint8_t I2C_GetFlagStatus(I2C_RegDef_t *pI2Cx, uint32_t FlagName)
+{
+	if(pI2Cx->SR1 & FlagName)
+	{
+		return FLAG_SET;
+	}
+	return FLAG_RESET;
+}
+
+
+/*********************************************************************************
  * @function 				- I2C_MasterSendData
  * @brief					- This function sends data from Master to Slave.
  *
@@ -227,6 +271,32 @@ void I2C_MasterSendData(I2C_Handle_t *pI2CHandle, uint8_t *pTxBuffer, uint32_t L
 	/* Generate start condition */
 	I2C_GenerateStartConditions(pI2CHandle->pI2Cx);
 
+	/* Confirm that start generation is completed by checking the SB flag in the SR1 */
+	while(! I2C_GetFlagStatus(pI2CHandle->pI2Cx, I2C_SB_FLAG));
+
+	/* Send the address of the slave with R/W bit on W[0] position (total 8 bits) */
+	I2C_ExecuteAddressPhase(pI2CHandle->pI2Cx, SlaveAddr);
+
+	/* 4. Confirm that address phase is completed by checking the ADDR flag in the SR1 */
+	while(! I2C_GetFlagStatus(pI2CHandle->pI2Cx, I2C_ADDR_FLAG));
+
+	/* Clear the ADDR flag according to its software sequence */
+	I2C_ClearADDRFlag(pI2CHandle->pI2Cx);
+
+	/* Send data until the LEN becomes 0 */
+	while(Len < 0)
+	{
+		while(! I2C_GetFlagStatus(pI2CHandle->pI2Cx, I2C_TXE_FLAG));
+		pI2CHandle->pI2Cx->DR = *pTxBuffer;
+		pTxBuffer++;
+		Len--;
+	}
+
+	while(! I2C_GetFlagStatus(pI2CHandle->pI2Cx, I2C_TXE_FLAG));	// Data register empty
+	while(! I2C_GetFlagStatus(pI2CHandle->pI2Cx, I2C_BTF_FLAG));	// Byte transfer finished
+
+	/* Generate stop condition */
+	I2C_GenerateStopConditions(pI2CHandle->pI2Cx);
 
 }
 
