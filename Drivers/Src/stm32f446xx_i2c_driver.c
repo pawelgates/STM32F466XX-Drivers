@@ -372,14 +372,14 @@ void I2C_MasterReceiveData(I2C_Handle_t *pI2CHandle, uint8_t *pRxBuffer, uint32_
 		/* Disable the ACK */
 		I2C_ManageAcking(pI2CHandle->pI2Cx, I2C_ACK_DISABLE);
 
-		/* Generate stop condition */
-		I2C_GenerateStopConditions(pI2CHandle->pI2Cx);
-
 		/* Clear the ADDR flag according to its software sequence */
 		I2C_ClearADDRFlag(pI2CHandle->pI2Cx);
 
 		/* Wait until RXNE flag will be 1 */
 		while(! I2C_GetFlagStatus(pI2CHandle->pI2Cx, I2C_RXNE_FLAG));
+
+		/* Generate stop condition */
+		I2C_GenerateStopConditions(pI2CHandle->pI2Cx);
 
 		/* Read the data in to buffer */
 		*pRxBuffer = pI2CHandle->pI2Cx->DR;
